@@ -252,7 +252,12 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	sound11_sample = Sound::play_3D(*note11_sample, 0.3f, get_base_position()); 
     press_digit(12);
 	return true;
-} else if (evt.key.key == SDLK_BACKSPACE) { backspace_input(); return true; }
+
+
+}else if (evt.key.key == SDLK_E) {
+       start_playback(input_seq, 0.5f);
+}
+ else if (evt.key.key == SDLK_BACKSPACE) { backspace_input(); return true; }
   else if (evt.key.key == SDLK_RETURN || evt.key.key == SDLK_KP_ENTER) {
     submit_input();
     return true;
@@ -338,7 +343,7 @@ void PlayMode::submit_input() {
   if (has_won || has_lost) return;
 
   // Play the typed song:
-  start_playback(input_seq, 0.18f);
+  start_playback(input_seq, 0.5f);
 
   // Validate vs target row:
   const std::vector<int>& target = levels.back();
