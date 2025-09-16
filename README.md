@@ -7,7 +7,7 @@ the phone numbers you have to remember increase per level, and change over time
 
 Screen Shot:
 
-![Screen Shot](screenshot.png)
+![Screen Shot](game.png)
 
 How To Play:
 
