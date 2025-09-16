@@ -15,6 +15,8 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <cmath>
+#include <cstdio>
 
 GLuint hexapod_meshes_for_lit_color_texture_program = 0;
 Load< MeshBuffer > hexapod_meshes(LoadTagDefault, []() -> MeshBuffer const * {
@@ -91,7 +93,7 @@ void PlayMode::start_game() {
   levels.clear();
   levels.push_back(make_random_row(12, 0, 12));
   current_level = 1; // start at level 1
-  
+  rng.seed(std::random_device{}());
   reset_level_state();  
 }
 
@@ -122,7 +124,7 @@ PlayMode::PlayMode() : scene(*phone_scene) {
   playback_wait = 0.0f;       
   playback_gap = 0.18f;   
   time_left = 60.0f;
-
+rng.seed(std::random_device{}());
 
 
   start_game();
@@ -168,22 +170,6 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 	if (evt.type == SDL_EVENT_KEY_DOWN) {
 		if (evt.key.key == SDLK_ESCAPE) {
 			SDL_SetWindowRelativeMouseMode(Mode::window, false);
-			return true;
-		} else if (evt.key.key == SDLK_A) {
-			left.downs += 1;
-			left.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_D) {
-			right.downs += 1;
-			right.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_W) {
-			up.downs += 1;
-			up.pressed = true;
-			return true;
-		} else if (evt.key.key == SDLK_S) {
-			down.downs += 1;
-			down.pressed = true;
 			return true;
 		} else if (evt.key.key == SDLK_1 || evt.key.key == SDLK_KP_1) {
    			if (sound1_sample) sound1_sample->stop();
@@ -271,7 +257,25 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	return false;
 }
-Sound::Sample PlayMode::sample_for_value(int v) {
+
+void PlayMode::step_playback(float elapsed) {
+  if (!is_playing) return;
+  playback_timer -= elapsed;
+  if (playback_timer <= 0.0f) {
+    if (playback_pending.empty()) {
+      is_playing = false;
+      return;
+    }
+    int v = playback_pending.back();
+    playback_pending.pop_back();
+    if (auto s = sample_for_value(v)) {
+      Sound::play_3D(*s, 0.3f, get_base_position());
+    }
+    playback_timer += playback_interval;
+  }
+}
+
+Sound::Sample const* PlayMode::sample_for_value(int v) const {
   switch (v) {
     case 0:  return note0_sample;
     case 1:  return note1_sample;
@@ -475,11 +479,11 @@ bool PlayMode::check_win() const {
 }
 
 
-void PlayMode::reset_level_state() {
-  level_time_left = 60.0f;
-  current_input.clear();
-  playback_queue.clear();
-  playback_pos = 0;
-  playback_wait = 0.0f;
-  playing_note.reset();
-}
+// void PlayMode::reset_level_state() {
+//   level_time_left = 60.0f;
+//   current_input.clear();
+//   playback_queue.clear();
+//   playback_pos = 0;
+//   playback_wait = 0.0f;
+//   playing_note.reset();
+// }

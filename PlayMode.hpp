@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <deque>
+#include <random>
 
 struct PlayMode : Mode {
 	PlayMode();
@@ -90,13 +91,10 @@ struct PlayMode : Mode {
 	std::string input_as_string() const;  // pretty-print current_input
 	void submit_input();                  // queue playback, check answer
 
-
-	void reset_level_state();             // timer + input + playback
-
 	void service_playback(float elapsed);
 
 	std::shared_ptr<Sound::PlayingSample> play_note_value(int v);
-
+	Sound::Sample const* sample_for_value(int v) const;
 	// ----- input / gameplay -----
 	std::vector<int> input_seq;   // what the player has typed this level
 
@@ -116,6 +114,5 @@ void lose_game(const char* reason);
 void start_playback(const std::vector<int>& seq, float interval);
 void step_playback(float elapsed);
 void current_row_as_string(std::string &out) const;
-Sound::Sample *sample_for_value(int v);
 
 };
