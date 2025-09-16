@@ -89,6 +89,7 @@ Load< Sound::Sample > note12_sample(LoadTagDefault, []() -> Sound::Sample const 
 });
 
 
+
 void PlayMode::start_game() {
   has_won = false;
   has_lost = false;
@@ -97,6 +98,7 @@ void PlayMode::start_game() {
   current_level = 1; // start at level 1
   rng.seed(std::random_device{}());
   reset_level_state();  
+  play_level_sound(0.35f, 0.18f);
 }
 
 PlayMode::PlayMode() : scene(*phone_scene) {
@@ -132,7 +134,6 @@ PlayMode::PlayMode() : scene(*phone_scene) {
 phone_kick_duration = 0.35f;  
 phone_kick_angle_deg= 20.0f; 
 
-void trigger_phone_kick(bool success);
 rng.seed(std::random_device{}());
 
 
@@ -140,6 +141,11 @@ rng.seed(std::random_device{}());
 
 }
 
+void PlayMode::play_level_sound(float start_delay, float interval) {
+  if (levels.empty() || has_won || has_lost) return;
+  // Play the target row of the *current* level as an audio hint:
+  start_playback(levels.back(), interval);
+}
 
 PlayMode::~PlayMode() {
 }
@@ -511,6 +517,7 @@ void PlayMode::next_level() {
   if (current_level >= max_level) has_won = true;
 
   reset_level_state(); 
+  play_level_sound(0.35f, 0.18f);
 }
 bool PlayMode::check_win() const {
   return has_won;

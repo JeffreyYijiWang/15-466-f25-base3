@@ -98,7 +98,7 @@ struct PlayMode : Mode {
 	// ----- input / gameplay -----
 	std::vector<int> input_seq;   // what the player has typed this level
 
-	
+	void play_level_sound(float start_delay, float interval);
 
 	// playback of typed sequence (on Enter)
 	std::vector<int> playback_pending;
