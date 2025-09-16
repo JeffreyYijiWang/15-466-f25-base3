@@ -18,6 +18,8 @@
 #include <cmath>
 #include <cstdio>
 
+//made with help of chatgpt for database strucuturing and random level generation
+
 GLuint hexapod_meshes_for_lit_color_texture_program = 0;
 Load< MeshBuffer > hexapod_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer const *ret = new MeshBuffer(data_path("phone.pnct"));
@@ -124,6 +126,13 @@ PlayMode::PlayMode() : scene(*phone_scene) {
   playback_wait = 0.0f;       
   playback_gap = 0.18f;   
   time_left = 60.0f;
+   phone_kick_active   = false;
+ phone_kick_success  = false;  
+ phone_kick_t        = 0.0f;
+phone_kick_duration = 0.35f;  
+phone_kick_angle_deg= 20.0f; 
+
+void trigger_phone_kick(bool success);
 rng.seed(std::random_device{}());
 
 
@@ -141,6 +150,12 @@ void PlayMode::reset_level_state() {
   is_playing = false;
   playback_timer = 0.0f;
   playback_pending.clear();
+}
+
+void PlayMode::trigger_phone_kick(bool success) {
+  phone_kick_success = success;
+  phone_kick_active  = true;
+  phone_kick_t       = 0.0f;
 }
 
 void PlayMode::reset_timer(float seconds) {
@@ -324,6 +339,8 @@ void PlayMode::submit_input() {
   bool ok = (input_seq.size() == target.size()) &&
             std::equal(input_seq.begin(), input_seq.end(), target.begin());
 
+	trigger_phone_kick(ok);
+
   if (ok) {
     next_level();     // this also resets the input + timer
   } else {
@@ -342,8 +359,29 @@ void PlayMode::update(float elapsed) {
     }
   }
 
+
+
   // advance audio playback queue
   step_playback(elapsed);
+  if (phone_kick_active && phone) {
+  phone_kick_t += elapsed;
+
+  float u = std::min(phone_kick_t / phone_kick_duration, 1.0f);
+  // yoyo ease: 0→1→0 over the duration
+  float y = std::sin(u * float(3.14159265f));
+
+  
+  float signed_deg = (phone_kick_success ? +phone_kick_angle_deg : -phone_kick_angle_deg) * y;
+
+
+  glm::quat q = phone_rotation * glm::angleAxis(glm::radians(signed_deg), glm::vec3(0.0f, 0.0f, 1.0f));
+  phone->rotation = q;
+
+  if (u >= 1.0f) {
+    phone_kick_active = false;
+    phone->rotation   = phone_rotation; 
+  }
+}
 	//reset button press counters:
 	left.downs = 0;
 	right.downs = 0;

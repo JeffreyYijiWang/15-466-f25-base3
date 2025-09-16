@@ -106,6 +106,15 @@ struct PlayMode : Mode {
 	float playback_interval;
 	bool is_playing;
 
+	//animations
+	bool  phone_kick_active ;
+bool  phone_kick_success ;   // true = correct, false = wrong
+float phone_kick_t   ;
+float phone_kick_duration ;   // seconds
+float phone_kick_angle_deg;   // how far to tilt
+
+void trigger_phone_kick(bool success);
+
 // ----- helpers -----
 void reset_level_state();                 // clears input, resets timer/loss/playback
 void reset_timer(float seconds);
