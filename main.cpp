@@ -167,6 +167,10 @@ int main(int argc, char **argv) {
 					}
 					save_png(filename, glm::uvec2(w,h), data.data(), LowerLeftOrigin);
 				}
+				else if (evt.type == SDL_EVENT_KEY_DOWN && evt.key.key == SDLK_R) {
+					Sound::stop_all_samples();
+					Mode::set_current(std::make_shared< PlayMode >());
+				}
 			}
 			if (!Mode::current) break;
 		}
